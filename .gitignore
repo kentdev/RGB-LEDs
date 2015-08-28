@@ -30,6 +30,9 @@
 # FreeCAD automatic backups
 *.fcstd1
 
+# FreeCAD STEP exports
+*.step
+
 # EAGLE automatic backups
 *.s\#*
 *.b\#*
