@@ -188,16 +188,24 @@
 <text x="-3.81" y="5.08" size="1.27" layer="25">&gt;NAME</text>
 <text x="-3.81" y="2.54" size="1.27" layer="27">&gt;VALUE</text>
 </package>
-<package name="VREG_THROUGHHOLE">
-<pad name="1" x="-2.54" y="0" drill="1.016"/>
-<pad name="2" x="0" y="0" drill="1.016"/>
-<pad name="3" x="2.54" y="0" drill="1.016"/>
-<wire x1="-3.81" y1="1.27" x2="3.81" y2="1.27" width="0.8128" layer="21"/>
-<wire x1="3.81" y1="1.27" x2="3.81" y2="-1.27" width="0.127" layer="21"/>
-<wire x1="3.81" y1="-1.27" x2="-3.81" y2="-1.27" width="0.127" layer="21"/>
-<wire x1="-3.81" y1="-1.27" x2="-3.81" y2="1.27" width="0.127" layer="21"/>
-<text x="-3.81" y="2.54" size="1.27" layer="25">&gt;NAME</text>
-<text x="-3.81" y="-2.54" size="1.27" layer="27">&gt;VALUE</text>
+<package name="SOT-23-5">
+<wire x1="1.422" y1="-0.781" x2="-1.423" y2="-0.781" width="0.1524" layer="51"/>
+<wire x1="-1.423" y1="-0.781" x2="-1.423" y2="0.781" width="0.1524" layer="21"/>
+<wire x1="-1.423" y1="0.781" x2="1.422" y2="0.781" width="0.1524" layer="51"/>
+<wire x1="1.422" y1="0.781" x2="1.422" y2="-0.781" width="0.1524" layer="21"/>
+<circle x="-1.15" y="-0.5" radius="0.1" width="0" layer="21"/>
+<smd name="1" x="-0.95" y="-1.15" dx="0.6" dy="0.9" layer="1"/>
+<smd name="2" x="0" y="-1.15" dx="0.6" dy="0.9" layer="1"/>
+<smd name="3" x="0.95" y="-1.15" dx="0.6" dy="0.9" layer="1"/>
+<smd name="4" x="0.95" y="1.15" dx="0.6" dy="0.9" layer="1"/>
+<smd name="5" x="-0.95" y="1.15" dx="0.6" dy="0.9" layer="1"/>
+<text x="-1.397" y="-2.672" size="1.016" layer="27" ratio="10">&gt;VALUE</text>
+<text x="-1.397" y="1.702" size="1.016" layer="25" ratio="10">&gt;NAME</text>
+<rectangle x1="-1.2" y1="-1.4" x2="-0.7" y2="-0.8" layer="51"/>
+<rectangle x1="-0.25" y1="-1.4" x2="0.25" y2="-0.8" layer="51"/>
+<rectangle x1="0.7" y1="-1.4" x2="1.2" y2="-0.8" layer="51"/>
+<rectangle x1="0.7" y1="0.8" x2="1.2" y2="1.4" layer="51"/>
+<rectangle x1="-1.2" y1="0.8" x2="-0.7" y2="1.4" layer="51"/>
 </package>
 </packages>
 <symbols>
@@ -486,17 +494,17 @@
 </device>
 </devices>
 </deviceset>
-<deviceset name="LM7805" prefix="REG">
-<description>5V linear voltage regulator, through-hole</description>
+<deviceset name="MIC5205" prefix="REG">
+<description>150mA 5V voltage regulator</description>
 <gates>
 <gate name="G$1" symbol="VREG" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="VREG_THROUGHHOLE">
+<device name="" package="SOT-23-5">
 <connects>
 <connect gate="G$1" pin="GND" pad="2"/>
-<connect gate="G$1" pin="IN" pad="1"/>
-<connect gate="G$1" pin="OUT" pad="3"/>
+<connect gate="G$1" pin="IN" pad="1 3"/>
+<connect gate="G$1" pin="OUT" pad="5"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -6315,7 +6323,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="R1" library="resistor" deviceset="R-US_" device="0207/7" value="1M"/>
 <part name="SUPPLY4" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY5" library="supply2" deviceset="+12V" device=""/>
-<part name="C1" library="resistor" deviceset="C-EU" device="C0603" value="10uF"/>
+<part name="C1" library="resistor" deviceset="C-EU" device="C0603" value="1uF"/>
 <part name="SUPPLY6" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY8" library="supply2" deviceset="+5V" device=""/>
 <part name="POW1" library="RGB LED project" deviceset="PJ-202A" device=""/>
@@ -6333,9 +6341,11 @@ Source: AVX .. aphvc.pdf</description>
 <part name="SUPPLY16" library="supply2" deviceset="+12V" device=""/>
 <part name="SUPPLY17" library="supply2" deviceset="GND" device=""/>
 <part name="CONN1" library="RGB LED project" deviceset="4-PIN-RIGHT-ANGLE" device=""/>
-<part name="REG1" library="RGB LED project" deviceset="LM7805" device="" value="LM7805"/>
-<part name="C2" library="resistor" deviceset="C-EU" device="C0603" value="10uF"/>
-<part name="C3" library="resistor" deviceset="C-EU" device="C0603" value="10uF"/>
+<part name="C2" library="resistor" deviceset="C-EU" device="C0603" value="1uF"/>
+<part name="C3" library="resistor" deviceset="C-EU" device="C0603" value="1uF"/>
+<part name="REG1" library="RGB LED project" deviceset="MIC5205" device=""/>
+<part name="SUPPLY7" library="supply2" deviceset="+5V" device=""/>
+<part name="SUPPLY18" library="supply2" deviceset="+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6343,14 +6353,14 @@ Source: AVX .. aphvc.pdf</description>
 <text x="-40.64" y="-86.36" size="1.778" layer="97" rot="R90">To LED strip</text>
 </plain>
 <instances>
-<instance part="S1" gate="G$1" x="-35.56" y="-7.62"/>
+<instance part="S1" gate="G$1" x="-83.82" y="-12.7" rot="R270"/>
 <instance part="ROTARY_P0915N" gate="G$1" x="-38.1" y="-30.48"/>
 <instance part="SLIDE_PTA2043" gate="G$1" x="-60.96" y="-30.48"/>
-<instance part="SUPPLY1" gate="+5V" x="-60.96" y="-5.08"/>
+<instance part="SUPPLY1" gate="+5V" x="-60.96" y="-7.62"/>
 <instance part="SUPPLY2" gate="GND" x="-60.96" y="-40.64"/>
 <instance part="SUPPLY3" gate="GND" x="-38.1" y="-40.64"/>
-<instance part="R1" gate="G$1" x="-12.7" y="-7.62" rot="R180"/>
-<instance part="SUPPLY4" gate="GND" x="-7.62" y="-10.16"/>
+<instance part="R1" gate="G$1" x="-83.82" y="-33.02" rot="R90"/>
+<instance part="SUPPLY4" gate="GND" x="-83.82" y="-40.64"/>
 <instance part="SUPPLY5" gate="+12V" x="-15.24" y="38.1"/>
 <instance part="C1" gate="G$1" x="-15.24" y="27.94"/>
 <instance part="SUPPLY6" gate="GND" x="-5.08" y="17.78"/>
@@ -6370,9 +6380,11 @@ Source: AVX .. aphvc.pdf</description>
 <instance part="SUPPLY16" gate="+12V" x="-27.94" y="-68.58"/>
 <instance part="SUPPLY17" gate="GND" x="-27.94" y="-88.9"/>
 <instance part="CONN1" gate="G$1" x="-35.56" y="-78.74" rot="R180"/>
-<instance part="REG1" gate="G$1" x="-5.08" y="33.02"/>
 <instance part="C2" gate="G$1" x="5.08" y="27.94"/>
 <instance part="C3" gate="G$1" x="40.64" y="-2.54" rot="R90"/>
+<instance part="REG1" gate="G$1" x="-5.08" y="33.02"/>
+<instance part="SUPPLY7" gate="+5V" x="-38.1" y="-7.62"/>
+<instance part="SUPPLY18" gate="+5V" x="-83.82" y="-7.62"/>
 </instances>
 <busses>
 </busses>
@@ -6381,20 +6393,14 @@ Source: AVX .. aphvc.pdf</description>
 <segment>
 <pinref part="SUPPLY1" gate="+5V" pin="+5V"/>
 <pinref part="SLIDE_PTA2043" gate="G$1" pin="B"/>
-<wire x1="-60.96" y1="-7.62" x2="-60.96" y2="-22.86" width="0.1524" layer="91"/>
-<pinref part="ROTARY_P0915N" gate="G$1" pin="B"/>
-<wire x1="-60.96" y1="-22.86" x2="-38.1" y2="-22.86" width="0.1524" layer="91"/>
-<pinref part="S1" gate="G$1" pin="P$1"/>
-<wire x1="-38.1" y1="-22.86" x2="-38.1" y2="-7.62" width="0.1524" layer="91"/>
-<junction x="-60.96" y="-22.86"/>
-<junction x="-38.1" y="-22.86"/>
+<wire x1="-60.96" y1="-10.16" x2="-60.96" y2="-22.86" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <wire x1="5.08" y1="33.02" x2="12.7" y2="33.02" width="0.1524" layer="91"/>
 <pinref part="SUPPLY8" gate="+5V" pin="+5V"/>
-<pinref part="REG1" gate="G$1" pin="OUT"/>
 <pinref part="C2" gate="G$1" pin="1"/>
 <wire x1="5.08" y1="30.48" x2="5.08" y2="33.02" width="0.1524" layer="91"/>
+<pinref part="REG1" gate="G$1" pin="OUT"/>
 <junction x="5.08" y="33.02"/>
 </segment>
 <segment>
@@ -6413,6 +6419,15 @@ Source: AVX .. aphvc.pdf</description>
 <pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="40.64" y1="-81.28" x2="40.64" y2="-66.04" width="0.1524" layer="91"/>
 <junction x="40.64" y="-66.04"/>
+</segment>
+<segment>
+<pinref part="S1" gate="G$1" pin="P$1"/>
+<pinref part="SUPPLY18" gate="+5V" pin="+5V"/>
+</segment>
+<segment>
+<pinref part="ROTARY_P0915N" gate="G$1" pin="B"/>
+<pinref part="SUPPLY7" gate="+5V" pin="+5V"/>
+<wire x1="-38.1" y1="-10.16" x2="-38.1" y2="-22.86" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SLIDE_V" class="0">
@@ -6445,16 +6460,22 @@ Source: AVX .. aphvc.pdf</description>
 </net>
 <net name="COLOR_SW" class="0">
 <segment>
-<pinref part="S1" gate="G$1" pin="P$2"/>
-<wire x1="-27.94" y1="-7.62" x2="-17.78" y2="-7.62" width="0.1524" layer="91"/>
-<wire x1="-17.78" y1="-7.62" x2="-17.78" y2="-27.94" width="0.1524" layer="91"/>
-<pinref part="R1" gate="G$1" pin="2"/>
-<junction x="-17.78" y="-7.62"/>
-<label x="-17.78" y="-10.16" size="1.778" layer="95" rot="R180"/>
+<label x="-83.82" y="-22.86" size="1.778" layer="95" rot="R180"/>
 <pinref part="IC2" gate="G$1" pin="PA2_ADC2_AIN1_PCINT2"/>
 <wire x1="27.94" y1="-22.86" x2="7.62" y2="-22.86" width="0.1524" layer="91"/>
 <wire x1="7.62" y1="-22.86" x2="7.62" y2="-27.94" width="0.1524" layer="91"/>
-<wire x1="7.62" y1="-27.94" x2="-17.78" y2="-27.94" width="0.1524" layer="91"/>
+<label x="2.54" y="-27.94" size="1.778" layer="95" rot="R180"/>
+<wire x1="7.62" y1="-27.94" x2="2.54" y2="-27.94" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="S1" gate="G$1" pin="P$2"/>
+<pinref part="R1" gate="G$1" pin="2"/>
+<wire x1="-83.82" y1="-27.94" x2="-83.82" y2="-25.4" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="-25.4" x2="-83.82" y2="-20.32" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="-25.4" x2="-73.66" y2="-25.4" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="-25.4" x2="-73.66" y2="-48.26" width="0.1524" layer="91"/>
+<junction x="-83.82" y="-25.4"/>
+<label x="-73.66" y="-48.26" size="1.778" layer="95" rot="R180"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -6477,10 +6498,10 @@ Source: AVX .. aphvc.pdf</description>
 <wire x1="-5.08" y1="22.86" x2="-5.08" y2="20.32" width="0.1524" layer="91"/>
 <pinref part="SUPPLY6" gate="GND" pin="GND"/>
 <junction x="-5.08" y="20.32"/>
-<pinref part="REG1" gate="G$1" pin="GND"/>
 <pinref part="C2" gate="G$1" pin="2"/>
 <wire x1="-5.08" y1="20.32" x2="5.08" y2="20.32" width="0.1524" layer="91"/>
 <wire x1="5.08" y1="20.32" x2="5.08" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="REG1" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="POW1" gate="G$1" pin="GND"/>
@@ -6515,11 +6536,11 @@ Source: AVX .. aphvc.pdf</description>
 <net name="+12V" class="0">
 <segment>
 <pinref part="SUPPLY5" gate="+12V" pin="+12V"/>
-<wire x1="-15.24" y1="35.56" x2="-15.24" y2="33.02" width="0.1524" layer="91"/>
 <pinref part="C1" gate="G$1" pin="1"/>
 <wire x1="-15.24" y1="30.48" x2="-15.24" y2="33.02" width="0.1524" layer="91"/>
-<junction x="-15.24" y="33.02"/>
 <pinref part="REG1" gate="G$1" pin="IN"/>
+<wire x1="-15.24" y1="33.02" x2="-15.24" y2="35.56" width="0.1524" layer="91"/>
+<junction x="-15.24" y="33.02"/>
 </segment>
 <segment>
 <pinref part="POW1" gate="G$1" pin="VCC"/>
