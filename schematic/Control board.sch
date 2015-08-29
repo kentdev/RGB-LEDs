@@ -69,6 +69,7 @@
 <wire x1="-4.5" y1="2.5" x2="-4.5" y2="-2.5" width="0.127" layer="21" curve="-301.890792"/>
 <wire x1="-4.5" y1="2.5" x2="-4.5" y2="-2.5" width="0.127" layer="21"/>
 <text x="-3" y="5.5" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.81" y="-6.35" size="1.27" layer="27">&gt;VALUE</text>
 </package>
 <package name="P0915N">
 <description>Vertical rotary potentiometer</description>
@@ -119,6 +120,8 @@
 <wire x1="10.7" y1="0" x2="10.7" y2="-9.4" width="0.127" layer="21"/>
 <wire x1="10.7" y1="-9.4" x2="-6" y2="-9.4" width="0.127" layer="21"/>
 <wire x1="10.7" y1="0" x2="-6" y2="0" width="0.127" layer="21"/>
+<text x="-5.08" y="-8.89" size="1.27" layer="25">&gt;NAME</text>
+<text x="-5.08" y="-11.43" size="1.27" layer="27">&gt;VALUE</text>
 </package>
 <package name="PDIP-14">
 <description>&lt;b&gt;Dual In Line Package&lt;/b&gt;</description>
@@ -6304,8 +6307,8 @@ Source: AVX .. aphvc.pdf</description>
 </classes>
 <parts>
 <part name="S1" library="RGB LED project" deviceset="D6R00" device=""/>
-<part name="ROTARY" library="RGB LED project" deviceset="P0915N" device="" value="10k"/>
-<part name="SLIDE" library="RGB LED project" deviceset="PTA2043" device="" value="10k"/>
+<part name="ROTARY_P0915N" library="RGB LED project" deviceset="P0915N" device="" value="10k"/>
+<part name="SLIDE_PTA2043" library="RGB LED project" deviceset="PTA2043" device="" value="10k"/>
 <part name="SUPPLY1" library="supply2" deviceset="+5V" device=""/>
 <part name="SUPPLY2" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="GND" device=""/>
@@ -6341,8 +6344,8 @@ Source: AVX .. aphvc.pdf</description>
 </plain>
 <instances>
 <instance part="S1" gate="G$1" x="-35.56" y="-7.62"/>
-<instance part="ROTARY" gate="G$1" x="-38.1" y="-30.48"/>
-<instance part="SLIDE" gate="G$1" x="-60.96" y="-30.48"/>
+<instance part="ROTARY_P0915N" gate="G$1" x="-38.1" y="-30.48"/>
+<instance part="SLIDE_PTA2043" gate="G$1" x="-60.96" y="-30.48"/>
 <instance part="SUPPLY1" gate="+5V" x="-60.96" y="-5.08"/>
 <instance part="SUPPLY2" gate="GND" x="-60.96" y="-40.64"/>
 <instance part="SUPPLY3" gate="GND" x="-38.1" y="-40.64"/>
@@ -6377,9 +6380,9 @@ Source: AVX .. aphvc.pdf</description>
 <net name="+5V" class="0">
 <segment>
 <pinref part="SUPPLY1" gate="+5V" pin="+5V"/>
-<pinref part="SLIDE" gate="G$1" pin="B"/>
+<pinref part="SLIDE_PTA2043" gate="G$1" pin="B"/>
 <wire x1="-60.96" y1="-7.62" x2="-60.96" y2="-22.86" width="0.1524" layer="91"/>
-<pinref part="ROTARY" gate="G$1" pin="B"/>
+<pinref part="ROTARY_P0915N" gate="G$1" pin="B"/>
 <wire x1="-60.96" y1="-22.86" x2="-38.1" y2="-22.86" width="0.1524" layer="91"/>
 <pinref part="S1" gate="G$1" pin="P$1"/>
 <wire x1="-38.1" y1="-22.86" x2="-38.1" y2="-7.62" width="0.1524" layer="91"/>
@@ -6414,7 +6417,7 @@ Source: AVX .. aphvc.pdf</description>
 </net>
 <net name="SLIDE_V" class="0">
 <segment>
-<pinref part="SLIDE" gate="G$1" pin="S"/>
+<pinref part="SLIDE_PTA2043" gate="G$1" pin="S"/>
 <wire x1="-55.88" y1="-30.48" x2="-50.8" y2="-30.48" width="0.1524" layer="91"/>
 <wire x1="-50.8" y1="-30.48" x2="-50.8" y2="-48.26" width="0.1524" layer="91"/>
 <label x="-50.8" y="-48.26" size="1.778" layer="95" rot="R180"/>
@@ -6427,7 +6430,7 @@ Source: AVX .. aphvc.pdf</description>
 </net>
 <net name="ROT_V" class="0">
 <segment>
-<pinref part="ROTARY" gate="G$1" pin="S"/>
+<pinref part="ROTARY_P0915N" gate="G$1" pin="S"/>
 <wire x1="-33.02" y1="-30.48" x2="-27.94" y2="-30.48" width="0.1524" layer="91"/>
 <wire x1="-27.94" y1="-30.48" x2="-27.94" y2="-48.26" width="0.1524" layer="91"/>
 <label x="-27.94" y="-48.26" size="1.778" layer="95" rot="R180"/>
@@ -6456,11 +6459,11 @@ Source: AVX .. aphvc.pdf</description>
 </net>
 <net name="GND" class="0">
 <segment>
-<pinref part="SLIDE" gate="G$1" pin="A"/>
+<pinref part="SLIDE_PTA2043" gate="G$1" pin="A"/>
 <pinref part="SUPPLY2" gate="GND" pin="GND"/>
 </segment>
 <segment>
-<pinref part="ROTARY" gate="G$1" pin="A"/>
+<pinref part="ROTARY_P0915N" gate="G$1" pin="A"/>
 <pinref part="SUPPLY3" gate="GND" pin="GND"/>
 </segment>
 <segment>
