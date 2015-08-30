@@ -6381,7 +6381,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="POW1" library="RGB LED project" deviceset="PJ-202A" device=""/>
 <part name="SUPPLY9" library="supply2" deviceset="+12V" device=""/>
 <part name="SUPPLY10" library="supply2" deviceset="GND" device=""/>
-<part name="IC2" library="RGB LED project" deviceset="ATTINY44A" device="QFN-20"/>
+<part name="IC2" library="RGB LED project" deviceset="ATTINY44A" device="QFN-20" value="ATTINY44A"/>
 <part name="SUPPLY11" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY12" library="supply2" deviceset="+5V" device=""/>
 <part name="RES1" library="RGB LED project" deviceset="ZTT-16.00MX" device=""/>
