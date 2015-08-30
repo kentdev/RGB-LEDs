@@ -123,6 +123,37 @@
 <text x="-5.08" y="-8.89" size="1.27" layer="25">&gt;NAME</text>
 <text x="-5.08" y="-11.43" size="1.27" layer="27">&gt;VALUE</text>
 </package>
+<package name="QFN-20">
+<description>4x4 mm</description>
+<text x="-2.04" y="2.58" size="1.27" layer="25">&gt;NAME</text>
+<text x="-2.09" y="-3.4" size="1.27" layer="27">&gt;VALUE</text>
+<circle x="-2" y="2" radius="0.45" width="0.127" layer="21"/>
+<wire x1="-2" y1="2" x2="2" y2="2" width="0.127" layer="21"/>
+<wire x1="2" y1="2" x2="2" y2="-2" width="0.127" layer="21"/>
+<wire x1="2" y1="-2" x2="-2" y2="-2" width="0.127" layer="21"/>
+<wire x1="-2" y1="-2" x2="-2" y2="2" width="0.127" layer="21"/>
+<smd name="PAD" x="0" y="0" dx="2.6" dy="2.6" layer="1"/>
+<smd name="P$1" x="-1.8" y="1" dx="0.23" dy="0.6" layer="1" rot="R90"/>
+<smd name="P$2" x="-1.8" y="0.5" dx="0.23" dy="0.6" layer="1" rot="R90"/>
+<smd name="P$3" x="-1.8" y="0" dx="0.23" dy="0.6" layer="1" rot="R90"/>
+<smd name="P$4" x="-1.8" y="-0.5" dx="0.23" dy="0.6" layer="1" rot="R90"/>
+<smd name="P$5" x="-1.8" y="-1" dx="0.23" dy="0.6" layer="1" rot="R90"/>
+<smd name="P$6" x="-1" y="-1.8" dx="0.23" dy="0.6" layer="1" rot="R180"/>
+<smd name="P$7" x="-0.5" y="-1.8" dx="0.23" dy="0.6" layer="1" rot="R180"/>
+<smd name="P$8" x="0" y="-1.8" dx="0.23" dy="0.6" layer="1" rot="R180"/>
+<smd name="P$9" x="0.5" y="-1.8" dx="0.23" dy="0.6" layer="1" rot="R180"/>
+<smd name="P$10" x="1" y="-1.8" dx="0.23" dy="0.6" layer="1" rot="R180"/>
+<smd name="P$11" x="1.8" y="-1" dx="0.23" dy="0.6" layer="1" rot="R270"/>
+<smd name="P$12" x="1.8" y="-0.5" dx="0.23" dy="0.6" layer="1" rot="R270"/>
+<smd name="P$13" x="1.8" y="0" dx="0.23" dy="0.6" layer="1" rot="R270"/>
+<smd name="P$14" x="1.8" y="0.5" dx="0.23" dy="0.6" layer="1" rot="R270"/>
+<smd name="P$15" x="1.8" y="1" dx="0.23" dy="0.6" layer="1" rot="R270"/>
+<smd name="P$16" x="1" y="1.8" dx="0.23" dy="0.6" layer="1"/>
+<smd name="P$17" x="0.5" y="1.8" dx="0.23" dy="0.6" layer="1"/>
+<smd name="P$18" x="0" y="1.8" dx="0.23" dy="0.6" layer="1"/>
+<smd name="P$19" x="-0.5" y="1.8" dx="0.23" dy="0.6" layer="1"/>
+<smd name="P$20" x="-1" y="1.8" dx="0.23" dy="0.6" layer="1"/>
+</package>
 <package name="PDIP-14">
 <description>&lt;b&gt;Dual In Line Package&lt;/b&gt;</description>
 <wire x1="8.89" y1="2.921" x2="-8.89" y2="2.921" width="0.1524" layer="21"/>
@@ -413,7 +444,7 @@
 <gate name="G$1" symbol="ATTINY44A" x="-20.32" y="2.54"/>
 </gates>
 <devices>
-<device name="" package="PDIP-14">
+<device name="PDIP-14" package="PDIP-14">
 <connects>
 <connect gate="G$1" pin="GND" pad="14"/>
 <connect gate="G$1" pin="PA0_ADC0_AREF_PCINT0" pad="13"/>
@@ -429,6 +460,27 @@
 <connect gate="G$1" pin="PB2_CKOUT_OC0A_INT0_PCINT10" pad="5"/>
 <connect gate="G$1" pin="PB3_DW_RESET_PCINT11" pad="4"/>
 <connect gate="G$1" pin="VCC" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="QFN-20" package="QFN-20">
+<connects>
+<connect gate="G$1" pin="GND" pad="P$8 PAD"/>
+<connect gate="G$1" pin="PA0_ADC0_AREF_PCINT0" pad="P$5"/>
+<connect gate="G$1" pin="PA1_ADC1_AIN0_PCINT1" pad="P$4"/>
+<connect gate="G$1" pin="PA2_ADC2_AIN1_PCINT2" pad="P$3"/>
+<connect gate="G$1" pin="PA3_ADC3_T0_PCINT3" pad="P$2"/>
+<connect gate="G$1" pin="PA4_ADC4_USCK_SCL_T1_PCINT4" pad="P$1"/>
+<connect gate="G$1" pin="PA5_ADC5_DO_MISO_OC1B_PCINT5" pad="P$20"/>
+<connect gate="G$1" pin="PA6_ADC6_DI_MOSI_SDA_OC1A_PCINT6" pad="P$16"/>
+<connect gate="G$1" pin="PA7_ADC7_OC0B_ICP_PCINT7" pad="P$15"/>
+<connect gate="G$1" pin="PB0_CLK1_XTAL1_PCINT8" pad="P$11"/>
+<connect gate="G$1" pin="PB1_XTAL2_PCINT9" pad="P$12"/>
+<connect gate="G$1" pin="PB2_CKOUT_OC0A_INT0_PCINT10" pad="P$14"/>
+<connect gate="G$1" pin="PB3_DW_RESET_PCINT11" pad="P$13"/>
+<connect gate="G$1" pin="VCC" pad="P$9"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -6316,7 +6368,7 @@ Source: AVX .. aphvc.pdf</description>
 <parts>
 <part name="S1" library="RGB LED project" deviceset="D6R00" device=""/>
 <part name="ROTARY_P0915N" library="RGB LED project" deviceset="P0915N" device="" value="10k"/>
-<part name="SLIDE_PTA2043" library="RGB LED project" deviceset="PTA2043" device="" value="10k"/>
+<part name="SLIDE_PTA2043" library="RGB LED project" deviceset="PTA2043" device="" value="250k"/>
 <part name="SUPPLY1" library="supply2" deviceset="+5V" device=""/>
 <part name="SUPPLY2" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="GND" device=""/>
@@ -6329,7 +6381,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="POW1" library="RGB LED project" deviceset="PJ-202A" device=""/>
 <part name="SUPPLY9" library="supply2" deviceset="+12V" device=""/>
 <part name="SUPPLY10" library="supply2" deviceset="GND" device=""/>
-<part name="IC2" library="RGB LED project" deviceset="ATTINY44A" device=""/>
+<part name="IC2" library="RGB LED project" deviceset="ATTINY44A" device="QFN-20"/>
 <part name="SUPPLY11" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY12" library="supply2" deviceset="+5V" device=""/>
 <part name="RES1" library="RGB LED project" deviceset="ZTT-16.00MX" device=""/>
