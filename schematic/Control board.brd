@@ -1551,7 +1551,7 @@ Please make sure your boards conform to these design rules.</description>
 <element name="R3" library="resistor" package="0207/7" value="1M" x="34.29" y="42.545" smashed="yes" rot="R90">
 <attribute name="VALUE" x="34.8488" y="41.529" size="1.27" layer="21" font="vector" ratio="10" rot="R90"/>
 </element>
-<element name="RES1" library="RGB LED project" package="3-PIN-THROUGH-HOLE" value="ZTT-16.00MX" x="32.385" y="33.02" smashed="yes" rot="R90">
+<element name="RES1" library="RGB LED project" package="3-PIN-THROUGH-HOLE" value="ZTT-10.00MT" x="32.385" y="33.02" smashed="yes" rot="R90">
 <attribute name="VALUE" x="34.29" y="27.94" size="1.27" layer="21" font="vector" rot="R90"/>
 </element>
 <element name="ROTARY_P0915N" library="RGB LED project" package="P0915N" value="10k" x="25.4" y="4.445" smashed="yes">
