@@ -10,30 +10,54 @@ void sendToLED (const uint8_t rgb[3])
     
     register uint8_t p = LED_PORT;
     
-    //uint8_t r = rgb[0];
-    //uint8_t g = rgb[1];
-    //uint8_t b = rgb[2];
+    register uint8_t byteCounter = 0;
+    register uint8_t bitCounter = 0;
+    register uint8_t workingByte = 0;
     
     // send a reset pulse
     clear (LED_PORT, LED_NUM);
     _delay_us (25);
     
-    for (uint8_t timerLED = 0; timerLED != NUM_LEDS; timerLED++)
+    for (uint8_t timerLED = 0; timerLED != 2/*NUM_LEDS*/; timerLED++)
     {
+        _delay_us (5);
+        
+        const uint8_t *x = rgb;
+        
+        /*
+        // test:
+        for (int i = 0; i < 3; i++)
+        {
+            __asm__ volatile
+            (
+              "ld %[byte], X+;\n"
+              : [X]"+x"(x),
+                [byte]"+r"(workingByte)
+            );
+            
+            for (int j = 7; j >= 0; j--)
+            {
+                if (workingByte & (1 << j))
+                    set (LED_PORT, LED_NUM);
+                else
+                    clear (LED_PORT, LED_NUM);
+                _delay_us (1);
+            }
+            
+            clear (LED_PORT, LED_NUM);
+            _delay_us (5);
+        }
+        */
+        
         // 10MHz clock:
         //   high bit must be 18 cycles high and 7 cycles low
         //   low bit must be 7 cycles high and 18 cycles low
         // There should be no delay between the RGB bytes an individual LED
         
-        register uint8_t byteCounter;
-        register uint8_t bitCounter;
-        
-        register uint8_t workingByte;
-        
         __asm__ volatile
         (
          "ldi %[byteCount], 3;         \n" // (1) load 3 into the byte count register
-         "ld %[byte], %[rgb]+;         \n" // (2) load byte from rgb[] and increment pointer
+         "ld %[byte], X+;              \n" // (2) load byte from rgb[] and increment pointer
          
          // this runs on the first bit of every byte
          "byteLoop:                    \n"
@@ -64,25 +88,25 @@ void sendToLED (const uint8_t rgb[3])
 	     "  nop;                       \n" // (1)
 	     
 	     "  andi %[buffer], %[pinLow]; \n" // (1) LED output low in temp port buffer
-	     "  cpi %[bitCount], 0;        \n" // (1) compare the bit count with 0
+	     "  cpi %[bitCount], 1;        \n" // (1) compare the bit count with 1 (final bit)
 	     "  out %[port], %[buffer];    \n" // (1) send port buffer to port (LED LOW)
 	     
 	     // while we're waiting, check if this is the final bit
 	     // if it is, take this time to load the next byte and decrement the byte counter
 	                                       // compare happens before output is sent low, for timing
 	     "  brne notLastLow;           \n" // (1 if final bit, 2 if not final bit)
-	     "  ld %[byte], %[rgb]+;       \n" // (2) load byte from rgb[] and increment pointer
+	     "  ld %[byte], X+;            \n" // (2) load byte from rgb[] and increment pointer
 	     "  dec %[byteCount];          \n" // (1) subtract one from the byte count
 	     "  rjmp lastLow;              \n" // (2) jump to the business end of the low bit code
 	     
 	     "notLastLow:                  \n"
+	     "  lsl %[byte];               \n" // (1) shift the input byte left by one
 	     "  nop;                       \n"
 	     "  nop;                       \n"
-	     "  nop;                       \n"
-	     "  nop;                       \n" // (4)
+	     "  nop;                       \n" // (3)
 	     "lastLow:                     \n"
 	     
-	     "  lsl %[byte];               \n" // (1) shift the input byte left by one
+	     "  nop;                       \n" // (1)
 	     "  dec %[bitCount];           \n" // (1) subtract one from the bit count
 	     "  cpi %[bitCount], 0;        \n" // (1) compare the bit count with 0 for the loop test
 	     "  rjmp loops;                \n" // (2) jump to the loop test to see if this was the last bit
@@ -93,23 +117,23 @@ void sendToLED (const uint8_t rgb[3])
 	     
 	     // while we're waiting, check if this is the final bit
 	     // if it is, take this time to load the next byte and decrement the byte counter
-	     "  cpi %[bitCount], 0;        \n" // (1) compare the bit count with 0
+	     "  cpi %[bitCount], 1;        \n" // (1) compare the bit count with 1 (final bit)
 	     "  brne notLastHigh;          \n" // (1 if final bit, 2 if not final bit)
-	     "  ld %[byte], %[rgb]+;       \n" // (2) load byte from rgb[] and increment pointer
+	     "  ld %[byte], X+;            \n" // (2) load byte from rgb[] and increment pointer
 	     "  dec %[byteCount];          \n" // (1) subtract one from the byte count
 	     "  rjmp lastHigh;             \n" // (2) jump to the business end of the high bit code
 	     
 	     "notLastHigh:                 \n"
+	     "  lsl %[byte];               \n" // (1) shift the input byte left by one
 	     "  nop;                       \n"
 	     "  nop;                       \n"
-	     "  nop;                       \n"
-	     "  nop;                       \n" // (4)
+	     "  nop;                       \n" // (3)
 	     
 	     "lastHigh:                    \n"
 	     "  nop;                       \n"
-	     "  nop;                       \n" // (2)
+	     "  nop;                       \n"
+	     "  nop;                       \n" // (3)
 	     
-	     "  lsl %[byte];               \n" // (1) shift the input byte left by one
 	     "  dec %[bitCount];           \n" // (1) subtract one from the bit count
 	     
 	     "  andi %[buffer], %[pinLow]; \n" // (1) LED output low in temp port buffer
@@ -128,13 +152,13 @@ void sendToLED (const uint8_t rgb[3])
 	     
 	     
 	     // output operands
-	     : [byteCount]"+r"(byteCounter), // byte count register can be any register
-	       [bitCount]"+r"(bitCounter), // bit count register can be any register
-	       [byte]"+r"(workingByte), // input byte can also be any register
-	       [buffer]"=r"(p)  // LED port buffer
+	     : [X]"+x"(x),
+	       [byteCount]"+d"(byteCounter), // byte count must be an upper register
+	       [bitCount]"+d"(bitCounter), // bit count must be an upper register
+	       [byte]"+d"(workingByte), // input byte must be an upper register
+	       [buffer]"=d"(p)  // LED port buffer must be an upper register
 	     // input operands
-	     : [rgb]"e"(rgb), // pointer to rgb in RAM
-	       [pinHigh]""((uint8_t)(1 << LED_NUM)), // output pin 1, all other bits 0
+	     : [pinHigh]""((uint8_t)(1 << LED_NUM)), // output pin 1, all other bits 0
 	       [pinLow]""((uint8_t)(~(1 << LED_NUM))), // output pin 0, all other bits 1
 	       [port]"I"(_SFR_IO_ADDR(LED_PORT)) // LED PORT
 	    );
