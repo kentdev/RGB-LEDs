@@ -1,6 +1,8 @@
 #include "main.h"
 
-void sendToLED (uint8_t rgb[3]);
+void resetLEDs (void);
+void pushLED (const uint8_t rgb[3]);
+void sendToLEDs (const uint8_t rgb[3]);
 
 // HSV to RGB code taken from https://blog.adafruit.com/2012/03/14/constant-brightness-hsb-to-rgb-algorithm/
 // index is from 0-767, sat and bright are 0-255
@@ -18,6 +20,13 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
     color[1] = temp[n + 1];
     color[2] = temp[n    ];
 }
+
+static uint16_t hue = 0;
+static uint8_t saturation = 255;
+static uint8_t value = 64;
+
+static uint8_t rgb[3];
+static uint8_t rgbChain[NUM_LEDS][3];
 
 int main()
 {
@@ -41,14 +50,60 @@ int main()
     // initialize state variables
     bool colorMode = false;
     bool oldButtonState = false;
-    uint16_t old_slide_adc = 0;
-    uint16_t old_pot_adc = 0;
+    uint16_t old_slide_adc;
+    uint16_t old_pot_adc;
+    uint16_t slide_adc;
+    uint16_t pot_adc;
+    
+    // initialize ADC values
+    ADMUX = SLIDE_ADC;  // set the input to ADC0
+    set (ADCSRA, ADSC);  // start a conversion
+    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
+    slide_adc = ADC;
+    old_slide_adc = slide_adc;
+    
+    ADMUX = ROT_ADC;  // set the input to ADC1
+    set (ADCSRA, ADSC);  // start a conversion
+    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
+    pot_adc = ADC;
+    old_pot_adc = pot_adc;
+    
+    // initialize all to one color
+    hsb2rgbAN2 (hue, saturation, value, rgb);
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+        rgbChain[i][0] = rgb[0];
+        rgbChain[i][1] = rgb[1];
+        rgbChain[i][2] = rgb[2];
+    }
     
     for (;;)
     {
-        uint16_t slide_adc;
-        uint16_t pot_adc;
+        hue += 20;
+        if (hue >= 768)
+            hue -= 768;
         
+        hsb2rgbAN2 (hue, saturation, value, rgb);
+        
+        for (uint8_t i = NUM_LEDS - 1; i > 0; i--)
+        {
+            rgbChain[i][0] = rgbChain[i - 1][0];
+            rgbChain[i][1] = rgbChain[i - 1][1];
+            rgbChain[i][2] = rgbChain[i - 1][2];
+        }
+        rgbChain[0][0] = rgb[0];
+        rgbChain[0][1] = rgb[1];
+        rgbChain[0][2] = rgb[2];
+        
+        resetLEDs();
+        for (uint8_t i = 0; i < NUM_LEDS; i++)
+            pushLED (rgbChain[i]);
+        
+        //sendToLEDs (rgb);
+        
+        _delay_ms (50);
+        
+        /*
         bool colorChanged = false;
         
         // check for a button press
@@ -81,12 +136,13 @@ int main()
         // if there was a change to the inputs, re-send data to the LEDs
         if (old_slide_adc != slide_adc || colorChanged || (colorMode && (old_pot_adc != pot_adc)))
         {
-            uint8_t rgb[3];
             old_slide_adc = slide_adc;
             old_pot_adc = pot_adc;
             
             if (colorMode)
             {
+                uint8_t rgb[3];
+                
                 // pot_adc is between 0 and 1023, needs to be converted to between 0 and 767
                 pot_adc *= 3;
                 pot_adc /= 4;
@@ -97,11 +153,11 @@ int main()
             else
             {
                 const uint8_t val = (uint8_t)(slide_adc >> 2);
-                r = g = b = val;
+                uint8_t rgb[3] = {val, val, val};
                 sendToLED (rgb);
             }
         }
-        
+        */
     }
     
     return 0;
