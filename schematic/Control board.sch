@@ -81,13 +81,13 @@
 <pad name="R21" x="-2.5" y="-2.5" drill="1"/>
 <hole x="-5.5" y="7.5" drill="2"/>
 <hole x="5.5" y="7.5" drill="2"/>
-<text x="-3.81" y="5.08" size="1.27" layer="25">&gt;NAME</text>
-<text x="-3.81" y="2.54" size="1.27" layer="27">&gt;VALUE</text>
-<wire x1="-7.62" y1="10.16" x2="7.62" y2="10.16" width="0.127" layer="21"/>
-<wire x1="7.62" y1="10.16" x2="7.62" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="7.62" y1="-2.54" x2="-7.62" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="-7.62" y1="-2.54" x2="-7.62" y2="10.16" width="0.127" layer="21"/>
-<circle x="0" y="3.81" radius="5.6796125" width="0.127" layer="21"/>
+<text x="-3.81" y="3.08" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.81" y="1.54" size="1.27" layer="27">&gt;VALUE</text>
+<wire x1="-6.62" y1="11.24" x2="6.62" y2="11.24" width="0.127" layer="21"/>
+<wire x1="6.62" y1="11.24" x2="6.62" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="6.62" y1="-2.54" x2="-6.62" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="-6.62" y1="-2.54" x2="-6.62" y2="11.24" width="0.127" layer="21"/>
+<circle x="0" y="6.81" radius="3" width="0.127" layer="21"/>
 </package>
 <package name="PTA2043">
 <description>Bourns PTA2043 linear potentiometer</description>
@@ -6389,7 +6389,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="U$1" library="RGB LED project" deviceset="ISP" device=""/>
 <part name="SUPPLY14" library="supply2" deviceset="+5V" device=""/>
 <part name="SUPPLY15" library="supply2" deviceset="GND" device=""/>
-<part name="R3" library="resistor" deviceset="R-US_" device="0207/7" value="1M"/>
+<part name="R3" library="resistor" deviceset="R-US_" device="0207/7" value="10k"/>
 <part name="SUPPLY16" library="supply2" deviceset="+12V" device=""/>
 <part name="SUPPLY17" library="supply2" deviceset="GND" device=""/>
 <part name="CONN1" library="RGB LED project" deviceset="4-PIN-RIGHT-ANGLE" device=""/>
