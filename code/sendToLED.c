@@ -18,36 +18,9 @@ void sendToLED (const uint8_t rgb[3])
     clear (LED_PORT, LED_NUM);
     _delay_us (25);
     
-    for (uint8_t timerLED = 0; timerLED != 2/*NUM_LEDS*/; timerLED++)
+    for (uint8_t timerLED = 0; timerLED != NUM_LEDS; timerLED++)
     {
-        _delay_us (5);
-        
         const uint8_t *x = rgb;
-        
-        /*
-        // test:
-        for (int i = 0; i < 3; i++)
-        {
-            __asm__ volatile
-            (
-              "ld %[byte], X+;\n"
-              : [X]"+x"(x),
-                [byte]"+r"(workingByte)
-            );
-            
-            for (int j = 7; j >= 0; j--)
-            {
-                if (workingByte & (1 << j))
-                    set (LED_PORT, LED_NUM);
-                else
-                    clear (LED_PORT, LED_NUM);
-                _delay_us (1);
-            }
-            
-            clear (LED_PORT, LED_NUM);
-            _delay_us (5);
-        }
-        */
         
         // 10MHz clock:
         //   high bit must be 18 cycles high and 7 cycles low
