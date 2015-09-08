@@ -9,6 +9,9 @@ static uint8_t workingByte = 0;
 void resetLEDs (void)
 {
     // send a reset pulse
+    
+    // RESET: 24us low
+    
     clear (LED_PORT, LED_NUM);
     _delay_us (25);
 }
@@ -17,10 +20,38 @@ void pushLED (const uint8_t rgb[3])
 {
     const uint8_t *x = rgb;
     
+    // 0 bit: 0.7us high, 1.8us low, 200ns tolerance
+    // 1 bit: 1.8us high, 0.7us low, 200ns tolerance
+    
     // 10MHz clock:
     //   high bit must be 18 cycles high and 7 cycles low
     //   low bit must be 7 cycles high and 18 cycles low
     // There should be no delay between the RGB bytes an individual LED
+    
+    /*
+    This assembly code does the equivalent of this C code...
+    
+    for (uint8_t byte = 0; byte < 3; byte++)
+        for (uint8_t bit = 0; bit < 8; bit++)
+        {
+            set (LED_PORT, LED_NUM);
+            if (rgb[byte] & 0b10000000)
+                _delay_us (18);
+            else
+                _delay_us (7);
+            
+            clear (LED_PORT, LED_NUM);
+            if (rgb[byte] & 0b10000000)
+                _delay_us (7);
+            else
+                _delay_us (18);
+            
+            rgb[byte] <<= 1;
+        }
+    
+    ...except it packs all the set/clear/shift/test/loop operations into the delays
+    between high/low transitions.
+    */
     
     __asm__ volatile
     (
@@ -134,12 +165,6 @@ void pushLED (const uint8_t rgb[3])
 
 void sendToLEDs (const uint8_t rgb[3])
 {
-    // RESET: 24us low
-    // 0 bit: 0.7us high, 1.8us low, 200ns tolerance
-    // 1 bit: 1.8us high, 0.7us low, 200ns tolerance
-    
-    // 10MHz clock: 1 cycle per 0.1us
-    
     p = LED_PORT;
     
     resetLEDs();

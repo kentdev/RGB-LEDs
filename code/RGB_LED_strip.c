@@ -99,8 +99,6 @@ int main()
         for (uint8_t i = 0; i < NUM_LEDS; i++)
             pushLED (rgbChain[i]);
         
-        //sendToLEDs (rgb);
-        
         _delay_ms (50);
         
         /*
@@ -148,13 +146,13 @@ int main()
                 pot_adc /= 4;
                 
                 hsb2rgbAN2 (pot_adc, 255, (uint8_t)(slide_adc >> 2), rgb);
-                sendToLED (rgb);
+                sendToLEDs (rgb);
             }
             else
             {
                 const uint8_t val = (uint8_t)(slide_adc >> 2);
                 uint8_t rgb[3] = {val, val, val};
-                sendToLED (rgb);
+                sendToLEDs (rgb);
             }
         }
         */
