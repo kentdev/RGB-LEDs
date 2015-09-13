@@ -1,5 +1,7 @@
 #include "main.h"
 
+//#define DEMO
+
 void resetLEDs (void);
 void pushLED (const uint8_t rgb[3]);
 void sendToLEDs (const uint8_t rgb[3]);
@@ -21,12 +23,13 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
     color[2] = temp[n    ];
 }
 
+#ifdef DEMO
 static uint16_t hue = 0;
 static uint8_t saturation = 255;
 static uint8_t value = 64;
-
 static uint8_t rgb[3];
 static uint8_t rgbChain[NUM_LEDS][3];
+#endif
 
 int main()
 {
@@ -49,7 +52,6 @@ int main()
     
     // initialize state variables
     bool colorMode = false;
-    bool oldButtonState = false;
     uint16_t old_slide_adc;
     uint16_t old_pot_adc;
     uint16_t slide_adc;
@@ -68,6 +70,7 @@ int main()
     pot_adc = ADC;
     old_pot_adc = pot_adc;
     
+    #ifdef DEMO
     // initialize all to one color
     hsb2rgbAN2 (hue, saturation, value, rgb);
     for (uint8_t i = 0; i < NUM_LEDS; i++)
@@ -76,9 +79,12 @@ int main()
         rgbChain[i][1] = rgb[1];
         rgbChain[i][2] = rgb[2];
     }
+    #endif
     
     for (;;)
     {
+        #ifdef DEMO
+
         hue += 20;
         if (hue >= 768)
             hue -= 768;
@@ -100,8 +106,9 @@ int main()
             pushLED (rgbChain[i]);
         
         _delay_ms (50);
-        
-        /*
+
+        #else
+
         bool colorChanged = false;
         
         // check for a button press
@@ -155,7 +162,8 @@ int main()
                 sendToLEDs (rgb);
             }
         }
-        */
+        
+        #endif
     }
     
     return 0;
