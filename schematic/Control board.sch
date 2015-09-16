@@ -114,9 +114,9 @@
 <wire x1="-2.5" y1="-0.5" x2="-2.5" y2="0.5" width="0.127" layer="21"/>
 </package>
 <package name="PJ202A">
-<pad name="1" x="-3" y="-4.7" drill="3" shape="square"/>
-<pad name="2" x="3" y="-4.7" drill="3" shape="square"/>
-<pad name="3" x="0" y="0" drill="3" shape="square"/>
+<pad name="1" x="-3" y="-4.7" drill="1.3" shape="square"/>
+<pad name="2" x="3" y="-4.7" drill="1.3" shape="square"/>
+<pad name="3" x="0" y="0" drill="1.3" shape="square"/>
 <wire x1="10.7" y1="0" x2="10.7" y2="-9.4" width="0.127" layer="21"/>
 <wire x1="10.7" y1="-9.4" x2="-6" y2="-9.4" width="0.127" layer="21"/>
 <wire x1="10.7" y1="0" x2="-6" y2="0" width="0.127" layer="21"/>
