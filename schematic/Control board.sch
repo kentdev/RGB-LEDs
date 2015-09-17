@@ -118,10 +118,10 @@
 <pad name="2" x="3" y="-4.7" drill="1.3" shape="square"/>
 <pad name="3" x="0" y="0" drill="1.3" shape="square"/>
 <wire x1="10.7" y1="0" x2="10.7" y2="-9.4" width="0.127" layer="21"/>
-<wire x1="10.7" y1="-9.4" x2="-6" y2="-9.4" width="0.127" layer="21"/>
-<wire x1="10.7" y1="0" x2="-6" y2="0" width="0.127" layer="21"/>
-<text x="-5.08" y="-8.89" size="1.27" layer="25">&gt;NAME</text>
-<text x="-5.08" y="-11.43" size="1.27" layer="27">&gt;VALUE</text>
+<wire x1="10.7" y1="-9.4" x2="-3.46" y2="-9.4" width="0.127" layer="21"/>
+<wire x1="10.7" y1="0" x2="-3.46" y2="0" width="0.127" layer="21"/>
+<text x="-2.54" y="-8.89" size="1.27" layer="25">&gt;NAME</text>
+<text x="-2.54" y="-11.43" size="1.27" layer="27">&gt;VALUE</text>
 </package>
 <package name="QFN-20">
 <description>4x4 mm</description>
@@ -283,6 +283,7 @@
 <wire x1="-2.54" y1="10.16" x2="2.54" y2="10.16" width="0.254" layer="94"/>
 <wire x1="2.54" y1="10.16" x2="5.08" y2="12.7" width="0.254" layer="94" curve="90"/>
 <wire x1="-2.54" y1="10.16" x2="-5.08" y2="12.7" width="0.254" layer="94" curve="-90"/>
+<pin name="SENSE" x="-12.7" y="5.08" visible="pin" length="middle"/>
 </symbol>
 <symbol name="ATTINY44A">
 <pin name="VCC" x="-12.7" y="22.86" visible="pin" length="short" rot="R270"/>
@@ -376,8 +377,8 @@
 <devices>
 <device name="" package="D6R00">
 <connects>
-<connect gate="G$1" pin="P$1" pad="1A 2A"/>
-<connect gate="G$1" pin="P$2" pad="1B 2B"/>
+<connect gate="G$1" pin="P$1" pad="1A 1B"/>
+<connect gate="G$1" pin="P$2" pad="2A 2B"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -429,7 +430,8 @@
 <devices>
 <device name="" package="PJ202A">
 <connects>
-<connect gate="G$1" pin="GND" pad="2 3"/>
+<connect gate="G$1" pin="GND" pad="2"/>
+<connect gate="G$1" pin="SENSE" pad="3"/>
 <connect gate="G$1" pin="VCC" pad="1"/>
 </connects>
 <technologies>
@@ -6556,10 +6558,6 @@ Source: AVX .. aphvc.pdf</description>
 <pinref part="REG1" gate="G$1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="POW1" gate="G$1" pin="GND"/>
-<pinref part="SUPPLY10" gate="GND" pin="GND"/>
-</segment>
-<segment>
 <pinref part="IC2" gate="G$1" pin="GND"/>
 <wire x1="45.72" y1="-5.08" x2="45.72" y2="-2.54" width="0.1524" layer="91"/>
 <pinref part="SUPPLY11" gate="GND" pin="GND"/>
@@ -6584,6 +6582,10 @@ Source: AVX .. aphvc.pdf</description>
 <wire x1="-27.94" y1="-86.36" x2="-30.48" y2="-86.36" width="0.1524" layer="91"/>
 <pinref part="CONN1" gate="G$1" pin="P$1"/>
 </segment>
+<segment>
+<pinref part="POW1" gate="G$1" pin="GND"/>
+<pinref part="SUPPLY10" gate="GND" pin="GND"/>
+</segment>
 </net>
 <net name="+12V" class="0">
 <segment>
@@ -6595,13 +6597,13 @@ Source: AVX .. aphvc.pdf</description>
 <junction x="-15.24" y="33.02"/>
 </segment>
 <segment>
-<pinref part="POW1" gate="G$1" pin="VCC"/>
-<pinref part="SUPPLY9" gate="+12V" pin="+12V"/>
-</segment>
-<segment>
 <pinref part="SUPPLY16" gate="+12V" pin="+12V"/>
 <pinref part="CONN1" gate="G$1" pin="P$4"/>
 <wire x1="-27.94" y1="-71.12" x2="-30.48" y2="-71.12" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="POW1" gate="G$1" pin="VCC"/>
+<pinref part="SUPPLY9" gate="+12V" pin="+12V"/>
 </segment>
 </net>
 <net name="N$2" class="0">
