@@ -1,4 +1,5 @@
 #include "main.h"
+#include "sendToLED.h"
 
 static uint8_t p;
 
@@ -20,6 +21,12 @@ void pushLED (const uint8_t rgb[3])
 {
     const uint8_t *x = rgb;
     
+    /* This code takes an RGB value and sends it out LED_PORT, LED_NUM
+       (in this case, PA7) in the format expected by the TM1803
+       tricolor LED chip.
+    */
+    
+    
     // 0 bit: 0.7us high, 1.8us low, 200ns tolerance
     // 1 bit: 1.8us high, 0.7us low, 200ns tolerance
     
@@ -29,7 +36,7 @@ void pushLED (const uint8_t rgb[3])
     // There should be no delay between the RGB bytes an individual LED
     
     /*
-    This assembly code does the equivalent of this C code...
+    The assembly code does the equivalent of this C code...
     
     for (uint8_t byte = 0; byte < 3; byte++)
         for (uint8_t bit = 0; bit < 8; bit++)
@@ -169,7 +176,9 @@ void sendToLEDs (const uint8_t rgb[3])
     
     resetLEDs();
     
+    cli();
     for (uint8_t timerLED = 0; timerLED != NUM_LEDS; timerLED++)
         pushLED (rgb);
+    sei();
 }
 

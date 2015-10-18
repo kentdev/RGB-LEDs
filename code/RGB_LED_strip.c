@@ -1,16 +1,13 @@
 #include "main.h"
+#include "sendToLED.h"
 
 //#define DEMO
-
-void resetLEDs (void);
-void pushLED (const uint8_t rgb[3]);
-void sendToLEDs (const uint8_t rgb[3]);
 
 // HSV to RGB code taken from https://blog.adafruit.com/2012/03/14/constant-brightness-hsb-to-rgb-algorithm/
 // index is from 0-767, sat and bright are 0-255
 static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t color[3])
 {
-    uint8_t temp[5], n = (index >> 8);// % 3;
+    uint8_t temp[5], n = (index >> 8) % 3;
 // %3 not needed if input is constrained, but may be useful for color cycling and/or if modulo constant is fast
     uint8_t x = ((((index & 255) * sat) >> 8) * bright) >> 8;
 // shifts may be added for added speed and precision at the end if fast 32 bit calculation is available
@@ -24,53 +21,15 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
 }
 
 #ifdef DEMO
-static uint16_t hue = 0;
-static uint8_t saturation = 255;
-static uint8_t value = 64;
-static uint8_t rgb[3];
-static uint8_t rgbChain[NUM_LEDS][3];
-#endif
-
-int main()
+static void colorDemo (void)
 {
-    // set the input pins as inputs with no pull-ups
-    clear (SLIDE_PORT,  SLIDE_NUM);
-    clear (SLIDE_DDR,   SLIDE_NUM);
-    clear (ROT_PORT,    ROT_NUM);
-    clear (ROT_DDR,     ROT_NUM);
-    clear (BUTTON_PORT, BUTTON_NUM);
-    clear (BUTTON_DDR,  BUTTON_NUM);
+    uint16_t hue = 0;
+    uint8_t saturation = 255;
+    uint8_t value = 64;
+    int8_t valueDir = -1;
+    uint8_t rgb[3];
+    uint8_t rgbChain[NUM_LEDS][3];
     
-    // set the LED output pin as an output, starting out low
-    clear (LED_PORT, LED_NUM);
-    set   (LED_DDR,  LED_NUM);
-    
-    // set up the ADC
-    ADMUX = 0;  // VCC used as reference, ADC0 selected as current channel
-    ADCSRA = (1 << ADEN) | (1 << ADPS1) | (1 << ADPS2);  // /64 prescaler for 156.25kHz ADC clock
-    DIDR0 = (1 << ADC0D) | (1 << ADC1D);  // disable digital inputs for ADC0 and ADC1
-    
-    // initialize state variables
-    bool colorMode = false;
-    uint16_t old_slide_adc;
-    uint16_t old_pot_adc;
-    uint16_t slide_adc;
-    uint16_t pot_adc;
-    
-    // initialize ADC values
-    ADMUX = SLIDE_ADC;  // set the input to ADC0
-    set (ADCSRA, ADSC);  // start a conversion
-    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
-    slide_adc = ADC;
-    old_slide_adc = slide_adc;
-    
-    ADMUX = ROT_ADC;  // set the input to ADC1
-    set (ADCSRA, ADSC);  // start a conversion
-    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
-    pot_adc = ADC;
-    old_pot_adc = pot_adc;
-    
-    #ifdef DEMO
     // initialize all to one color
     hsb2rgbAN2 (hue, saturation, value, rgb);
     for (uint8_t i = 0; i < NUM_LEDS; i++)
@@ -79,15 +38,16 @@ int main()
         rgbChain[i][1] = rgb[1];
         rgbChain[i][2] = rgb[2];
     }
-    #endif
     
     for (;;)
     {
-        #ifdef DEMO
-
-        hue += 20;
+	    hue += 20;
         if (hue >= 768)
             hue -= 768;
+        
+        value += valueDir;
+        if (value == 0 || value == 64)
+            valueDir = -valueDir;
         
         hsb2rgbAN2 (hue, saturation, value, rgb);
         
@@ -106,65 +66,119 @@ int main()
             pushLED (rgbChain[i]);
         
         _delay_ms (50);
+    }
+}
+#endif
 
-        #else
-
-        bool colorChanged = false;
+static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
+{
+    static bool first = true;
+    static bool oldColorMode;
+    static uint16_t oldSlideADC = 0;
+    static uint16_t oldRotADC = 0;
+    
+    // slideADC goes from 0-1023, but we want 0-255
+    const uint8_t slide8 = slideADC / 4;
+    
+    // if there was a change to the inputs, re-send data to the LEDs
+    if (first ||
+        oldSlideADC != slideADC ||
+        colorMode != oldColorMode ||
+        (colorMode && (oldRotADC != rotADC)))
+    {
+        first = false;
+        oldColorMode = colorMode;
+        oldSlideADC = slideADC;
+        oldRotADC = rotADC;
         
+        if (colorMode)
+        {
+            uint8_t rgb[3];
+            
+            // potADC is between 0 and 1023, needs to be converted to between 0 and 767
+            rotADC *= 3;
+            rotADC /= 4;
+            
+            hsb2rgbAN2 (rotADC, 255, slide8, rgb);
+            sendToLEDs (rgb);
+        }
+        else
+        {
+            uint8_t rgb[3] = {slide8, slide8, slide8};
+            sendToLEDs (rgb);
+        }
+    }
+}
+
+static uint16_t readADC (const uint8_t num)
+{
+    uint16_t result = 0;
+    
+    ADMUX = num & 0b00111111;  // set the mux bits (max of ADC7)
+    set (ADCSRA, ADSC);  // start a conversion
+    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
+    
+    result = ADCL & 0xff;
+    result |= ((ADCH << 8) & 0xff00);
+    
+    return result;
+}
+
+static void lightControls (void)
+{
+    // initialize state variables
+    bool colorMode = false;
+    bool buttonPressed = false;
+    
+    for (;;)
+    {
         // check for a button press
-        if (check (BUTTON_PIN, BUTTON_NUM))
-        {  // button is pressed
+        if (!buttonPressed && check (BUTTON_PIN, BUTTON_NUM))
+        {  // button has just been pressed
             _delay_ms (1);  // debounce pause
             
             if (check (BUTTON_PIN, BUTTON_NUM))
             {
-                colorChanged = true;
+                buttonPressed = true;
                 colorMode = !colorMode;
-                while (check (BUTTON_PIN, BUTTON_NUM));  // wait for the button to be released
             }
         }
-        
-        // read from the ADC
-        ADMUX = SLIDE_ADC;  // set the input to ADC0
-        set (ADCSRA, ADSC);  // start a conversion
-        while (check (ADCSRA, ADSC));  // wait for the conversion to complete
-        slide_adc = ADC;
-        
-        if (colorMode)
-        {
-            ADMUX = ROT_ADC;  // set the input to ADC1
-            set (ADCSRA, ADSC);  // start a conversion
-            while (check (ADCSRA, ADSC));  // wait for the conversion to complete
-            pot_adc = ADC;
+        else if (buttonPressed && !check (BUTTON_PIN, BUTTON_NUM))
+        {  // button was pressed, but has just been released
+            buttonPressed = false;
         }
+
+        setLEDs (colorMode, readADC (SLIDE_ADC), readADC (ROT_ADC));
         
-        // if there was a change to the inputs, re-send data to the LEDs
-        if (old_slide_adc != slide_adc || colorChanged || (colorMode && (old_pot_adc != pot_adc)))
-        {
-            old_slide_adc = slide_adc;
-            old_pot_adc = pot_adc;
-            
-            if (colorMode)
-            {
-                uint8_t rgb[3];
-                
-                // pot_adc is between 0 and 1023, needs to be converted to between 0 and 767
-                pot_adc *= 3;
-                pot_adc /= 4;
-                
-                hsb2rgbAN2 (pot_adc, 255, (uint8_t)(slide_adc >> 2), rgb);
-                sendToLEDs (rgb);
-            }
-            else
-            {
-                const uint8_t val = (uint8_t)(slide_adc >> 2);
-                uint8_t rgb[3] = {val, val, val};
-                sendToLEDs (rgb);
-            }
-        }
-        
-        #endif
+        _delay_ms (10);
     }
+}
+
+
+int main()
+{
+    // set the input pins as inputs with no pull-ups
+    clear (SLIDE_PORT,  SLIDE_NUM);
+    clear (SLIDE_DDR,   SLIDE_NUM);
+    clear (ROT_PORT,    ROT_NUM);
+    clear (ROT_DDR,     ROT_NUM);
+    clear (BUTTON_PORT, BUTTON_NUM);
+    clear (BUTTON_DDR,  BUTTON_NUM);
+    
+    // set the LED output pin as an output, starting out low
+    clear (LED_PORT, LED_NUM);
+    set   (LED_DDR,  LED_NUM);
+    
+    // set up the ADC
+    ADMUX = 0;  // VCC used as reference, ADC0 selected as current channel
+    ADCSRA = (1 << ADEN) | (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2);  // /128 prescaler for 78.125kHz ADC clock
+    DIDR0 = (1 << SLIDE_ADC) | (1 << ROT_ADC);  // disable digital inputs for the slide and pot pins
+    
+#ifdef DEMO
+    colorDemo();
+#else
+    lightControls();
+#endif
     
     return 0;
 }
