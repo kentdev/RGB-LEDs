@@ -6,7 +6,7 @@ AVRDUDE_PORT = usb
 
 CFLAGS = -Wall -funsigned-bitfields -fshort-enums -std=gnu99 -Os
 
-FILES = RGB_LED_strip.c \
+FILES = main.c \
         sendToLED.c
 
 DEFINES = -DF_CPU=$(CLOCK) -DF_CLOCK=$(CLOCK)
@@ -35,8 +35,8 @@ clean:
 	rm -f main.hex main.elf $(MAIN) $(CHILDREN)
 
 # file targets:
-main.elf: $(FILES) $(O2_FILES)
-	$(COMPILE) $(FILES) -O2 $(O2_FILES) -o $@
+main.elf: $(FILES)
+	$(COMPILE) $(FILES) -o $@
 
 main.hex: main.elf
 	rm -f main.hex
