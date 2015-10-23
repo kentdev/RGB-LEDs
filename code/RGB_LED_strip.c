@@ -95,7 +95,7 @@ static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
         {
             uint8_t rgb[3];
             
-            // potADC is between 0 and 1023, needs to be converted to between 0 and 767
+            // rotADC is between 0 and 1023, needs to be converted to between 0 and 767
             rotADC *= 3;
             rotADC /= 4;
             
