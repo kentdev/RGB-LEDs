@@ -124,6 +124,19 @@ static uint16_t readADC (const uint8_t num)
     return result;
 }
 
+static uint16_t lowPassSlide (const uint16_t in)
+{
+    static int16_t prev = 0;
+    const int16_t alpha = 50; // out of 100
+    
+    int16_t new = prev + (alpha * ((int16_t)in - prev) / 100);
+    if (new < 0)
+        new = 0;
+    
+    prev = new;
+    return (uint16_t)new;
+}
+
 static void lightControls (void)
 {
     // initialize state variables
@@ -148,7 +161,7 @@ static void lightControls (void)
             buttonPressed = false;
         }
 
-        setLEDs (colorMode, readADC (SLIDE_ADC), readADC (ROT_ADC));
+        setLEDs (colorMode, lowPassSlide (readADC (SLIDE_ADC)), readADC (ROT_ADC));
         
         _delay_ms (10);
     }
