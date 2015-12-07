@@ -3,6 +3,9 @@
 
 //#define DEMO
 
+static uint32_t timeout = 0;  // counts the milliseconds since the LED values were last adjusted
+static uint8_t timeoutValue = 0;  // value of slide potentiometer when timeout began incrementing
+
 static uint8_t scale (const uint8_t in, const uint8_t numerator, const uint8_t denominator)
 {
     uint16_t x = in;
@@ -98,6 +101,42 @@ static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
     
     // slideADC goes from 0-1023, but we want 0-255
     const uint8_t slide8 = slideADC / 4;
+    
+    // add a small dead band
+    if (slide8 < 3)
+    {
+        const uint8_t zeroRGB[3] = {0, 0, 0};
+        sendToLEDs (zeroRGB);
+        
+        timeout = 0;  // reset timeout
+        timeoutValue = slide8;
+        
+        return;
+    }
+    
+    // if the light has been on for more than ~2 hours without change, turn off automatically
+    {
+        
+        // allow for a little jitter by requiring the value to change beyond some threshold
+        const uint8_t difference = (slide8 > timeoutValue) ? slide8 - timeoutValue : timeoutValue - slide8;
+        if (difference > 10)
+        {
+            timeout = 0;
+            timeoutValue = slide8;
+        }
+        else
+        {
+            timeout += 10;  // this function is called every 10ms
+        }
+        
+        // set timeout to 1000ms/sec * 3600sec/hour * 2hrs
+        if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)2)
+        {
+            const uint8_t zeroRGB[3] = {0, 0, 0};
+            sendToLEDs (zeroRGB);
+            return;
+        }
+    }
     
     // if there was a change to the inputs, re-send data to the LEDs
     if (first ||
