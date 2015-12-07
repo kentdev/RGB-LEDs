@@ -3,6 +3,18 @@
 
 //#define DEMO
 
+static uint8_t scale (const uint8_t in, const uint8_t numerator, const uint8_t denominator)
+{
+    uint16_t x = in;
+    x *= (uint16_t)numerator;
+    x /= (uint16_t)denominator;
+    
+    if (x > 255)
+        x = 255;
+    
+    return (uint8_t)x;
+}
+
 // HSV to RGB code taken from https://blog.adafruit.com/2012/03/14/constant-brightness-hsb-to-rgb-algorithm/
 // index is from 0-767, sat and bright are 0-255
 static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t color[3])
@@ -18,6 +30,13 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
     color[0] = temp[n + 2];
     color[1] = temp[n + 1];
     color[2] = temp[n    ];
+    
+    // Color balance for a better white:
+    // Ideally, I'd actually adjust the color temperature and then convert to RGB from there, but
+    // doing that is very slow (involves logarithms), so I'll just wing it.
+    color[0] = scale (color[0], 7, 10);  // scale down red intensity to 70%
+    color[1] = scale (color[1], 1, 1);  // keep green as-is
+    color[2] = scale (color[2], 9, 10);  // scale down blue slightly
 }
 
 #ifdef DEMO
@@ -87,6 +106,9 @@ static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
         (colorMode && (oldRotADC != rotADC)))
     {
         first = false;
+        
+        uint8_t rgb[3];
+        
         oldColorMode = colorMode;
         oldSlideADC = slideADC;
         oldRotADC = rotADC;
@@ -104,7 +126,7 @@ static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
         }
         else
         {
-            uint8_t rgb[3] = {slide8, slide8, slide8};
+            hsb2rgbAN2 (0, 0, slide8, rgb);
             sendToLEDs (rgb);
         }
     }
