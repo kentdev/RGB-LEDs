@@ -33,10 +33,10 @@
 #define LED_NUM  7
 
 // bit macros
-#define set(reg,bit)     reg |= (1<<(bit))
-#define clear(reg,bit)   reg &= ~(1<<(bit))
-#define toggle(reg,bit)  reg ^= (1<<(bit))
-#define check(reg,bit)   (bool)(reg & (1<<(bit)))
+#define set(reg,bit)     (reg |= (1<<(bit)))
+#define clear(reg,bit)   (reg &= ~(1<<(bit)))
+#define toggle(reg,bit)  (reg ^= (1<<(bit)))
+#define check(reg,bit)   ((bool)(reg & (1<<(bit))))
 
 #endif
 

@@ -11,6 +11,10 @@ FILES = main.c \
 
 DEFINES = -DF_CPU=$(CLOCK) -DF_CLOCK=$(CLOCK)
 
+ifneq ($(DEMO),)
+    DEFINES += -DDEMO
+endif
+
 COMPILE = avr-gcc $(CFLAGS) $(DEFINES) -mmcu=$(DEVICE)
 LINK = $(COMPILE)
 

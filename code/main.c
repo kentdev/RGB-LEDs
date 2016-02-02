@@ -1,10 +1,60 @@
 #include "main.h"
 #include "sendToLED.h"
 
-//#define DEMO
+#define SLIDE_DELTA 5
+#define ROT_DELTA 5
 
-static uint32_t timeout = 0;  // counts the milliseconds since the LED values were last adjusted
-static uint8_t timeoutValue = 0;  // value of slide potentiometer when timeout began incrementing
+//-----------------------------------------------------------------------------
+
+static uint16_t slideADC = 0;
+static uint16_t rotADC = 0;
+
+static uint8_t mux = 0;
+
+static void initADC (void)
+{
+    // set up the ADC
+    DIDR0 = (1 << SLIDE_ADC) | (1 << ROT_ADC);  // disable digital inputs for the slide and pot pins
+    ADMUX = 0;  // VCC used as reference, ADC0 selected as current channel
+    ADCSRA = (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2) | (1 << ADIE);  // /128 prescaler for 78.125kHz ADC clock, interrupt enabled
+    
+    mux = 0;
+    ADCSRA |= (1 << ADEN);  // enable ADC
+    ADCSRA |= (1 << ADSC);  // start the first conversion
+}
+
+ISR (ADC_vect)
+{
+    if (mux == 0)
+    {
+        slideADC = ADC;
+        mux = 1;
+    }
+    else
+    {
+        rotADC = ADC;
+        mux = 0;
+    }
+    
+    ADMUX = mux;  // switch to the other ADC input
+    ADCSRA |= (1 << ADSC);  // start a new conversion
+}
+
+static uint16_t readADC (uint8_t ch)
+{
+    uint16_t result;
+    
+    cli();
+    if (ch == 0)
+        result = slideADC;
+    else
+        result = rotADC;
+    sei();
+    
+    return result;
+}
+
+//-----------------------------------------------------------------------------
 
 static uint8_t scale (const uint8_t in, const uint8_t numerator, const uint8_t denominator)
 {
@@ -92,97 +142,34 @@ static void colorDemo (void)
 }
 #endif
 
-static void setLEDs (const bool colorMode, uint16_t slideADC, uint16_t rotADC)
+static void setLEDs (const bool colorMode, const uint16_t slideADC, const uint16_t rotADC)
 {
-    static bool first = true;
-    static bool oldColorMode;
-    static uint16_t oldSlideADC = 0;
-    static uint16_t oldRotADC = 0;
-    
     // slideADC goes from 0-1023, but we want 0-255
-    const uint8_t slide8 = slideADC / 4;
+    const uint8_t scaledSlide = slideADC / 4;
+    
+    // rotADC is between 0 and 1023, needs to be converted to between 0 and 767
+    const uint16_t scaledRotary = (rotADC * 3) / 4;
     
     // add a small dead band
-    if (slide8 < 3)
+    if (scaledSlide < 3)
     {
         const uint8_t zeroRGB[3] = {0, 0, 0};
         sendToLEDs (zeroRGB);
-        
-        timeout = 0;  // reset timeout
-        timeoutValue = slide8;
-        
-        return;
     }
-    
-    // if the light has been on for more than ~2 hours without change, turn off automatically
+    else if (colorMode)
     {
-        
-        // allow for a little jitter by requiring the value to change beyond some threshold
-        const uint8_t difference = (slide8 > timeoutValue) ? slide8 - timeoutValue : timeoutValue - slide8;
-        if (difference > 10)
-        {
-            timeout = 0;
-            timeoutValue = slide8;
-        }
-        else
-        {
-            timeout += 10;  // this function is called every 10ms
-        }
-        
-        // set timeout to 1000ms/sec * 3600sec/hour * 2hrs
-        if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)2)
-        {
-            const uint8_t zeroRGB[3] = {0, 0, 0};
-            sendToLEDs (zeroRGB);
-            return;
-        }
-    }
-    
-    // if there was a change to the inputs, re-send data to the LEDs
-    if (first ||
-        oldSlideADC != slideADC ||
-        colorMode != oldColorMode ||
-        (colorMode && (oldRotADC != rotADC)))
-    {
-        first = false;
-        
         uint8_t rgb[3];
         
-        oldColorMode = colorMode;
-        oldSlideADC = slideADC;
-        oldRotADC = rotADC;
-        
-        if (colorMode)
-        {
-            uint8_t rgb[3];
-            
-            // rotADC is between 0 and 1023, needs to be converted to between 0 and 767
-            rotADC *= 3;
-            rotADC /= 4;
-            
-            hsb2rgbAN2 (rotADC, 255, slide8, rgb);
-            sendToLEDs (rgb);
-        }
-        else
-        {
-            hsb2rgbAN2 (0, 0, slide8, rgb);
-            sendToLEDs (rgb);
-        }
+        hsb2rgbAN2 (scaledRotary, 255, scaledSlide, rgb);
+        sendToLEDs (rgb);
     }
-}
-
-static uint16_t readADC (const uint8_t num)
-{
-    uint16_t result = 0;
-    
-    ADMUX = num & 0b00111111;  // set the mux bits (max of ADC7)
-    set (ADCSRA, ADSC);  // start a conversion
-    while (check (ADCSRA, ADSC));  // wait for the conversion to complete
-    
-    result = ADCL & 0xff;
-    result |= ((ADCH << 8) & 0xff00);
-    
-    return result;
+    else
+    {
+        uint8_t rgb[3];
+        
+        hsb2rgbAN2 (0, 0, scaledSlide, rgb);
+        sendToLEDs (rgb);
+    }
 }
 
 static uint16_t lowPassSlide (const uint16_t in)
@@ -201,29 +188,69 @@ static uint16_t lowPassSlide (const uint16_t in)
 static void lightControls (void)
 {
     // initialize state variables
-    bool colorMode = false;
-    bool buttonPressed = false;
+    static bool colorMode = false;
+    static bool buttonWasDown[2] = {false, false};
+    
+    static int32_t timeout = 0;  // counts the milliseconds since the LED values were last adjusted, negative if timeout has registered
+    
+    uint16_t oldSlideValue = readADC (SLIDE_ADC);
+    uint16_t oldRotaryValue = readADC (ROT_ADC);
     
     for (;;)
     {
-        // check for a button press
-        if (!buttonPressed && check (BUTTON_PIN, BUTTON_NUM))
-        {  // button has just been pressed
-            _delay_ms (1);  // debounce pause
-            
-            if (check (BUTTON_PIN, BUTTON_NUM))
-            {
-                buttonPressed = true;
-                colorMode = !colorMode;
-            }
+        //toggle (PORTA, 6);
+        const uint16_t slideValue = readADC (SLIDE_ADC);
+        const uint16_t rotaryValue = readADC (ROT_ADC);
+        
+        // check for a button press event
+        // button is registered as pressed if down for at least 2 loops (20ms), then up
+        const bool buttonIsDown = check (BUTTON_PIN, BUTTON_NUM);
+        const bool buttonEvent = (buttonWasDown[0] && buttonWasDown[1] && !buttonIsDown);
+        
+        buttonWasDown[1] = buttonWasDown[0];
+        buttonWasDown[0] = buttonIsDown;
+        
+        // toggle color mode on button press event
+        if (buttonEvent)
+            colorMode = !colorMode;
+        
+        const bool slidePositionChanged = ((slideValue > oldSlideValue) ?
+                                                (slideValue - oldSlideValue > SLIDE_DELTA) :
+                                                (oldSlideValue - slideValue > SLIDE_DELTA));
+        
+        const bool rotaryPositionChanged = ((rotaryValue > oldRotaryValue) ?
+                                                (rotaryValue - oldRotaryValue > ROT_DELTA) :
+                                                (oldRotaryValue - rotaryValue > ROT_DELTA));
+        
+        if (slidePositionChanged)
+            oldSlideValue = slideValue;
+        
+        if (rotaryPositionChanged)
+            oldRotaryValue = rotaryValue;
+        
+        if (buttonEvent || slidePositionChanged || rotaryPositionChanged)
+        {  // timeout reset
+            timeout = 0;
+            setLEDs (colorMode, slideValue, rotaryValue);
         }
-        else if (buttonPressed && !check (BUTTON_PIN, BUTTON_NUM))
-        {  // button was pressed, but has just been released
-            buttonPressed = false;
+        else if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)2)
+        {  // timeout event
+            const uint8_t zeroRGB[3] = {0, 0, 0};
+            sendToLEDs (zeroRGB);
+        }
+        else if (timeout < 0)
+        {  // timeout event has already happened, waiting for timeout reset
+            const uint8_t zeroRGB[3] = {0, 0, 0};
+            cli();
+            pushLED (zeroRGB);  // slowly send zeros to ensure the LEDs are off
+            sei();
+        }
+        else
+        {  // no timeout, but also no timeout reset
+            setLEDs (colorMode, slideValue, rotaryValue);
+            timeout += 10;
         }
 
-        setLEDs (colorMode, lowPassSlide (readADC (SLIDE_ADC)), readADC (ROT_ADC));
-        
         _delay_ms (10);
     }
 }
@@ -239,20 +266,24 @@ int main()
     clear (BUTTON_PORT, BUTTON_NUM);
     clear (BUTTON_DDR,  BUTTON_NUM);
     
+    //set (DDRA, 6);
+    //clear(PORTA, 6);
+    
     // set the LED output pin as an output, starting out low
     clear (LED_PORT, LED_NUM);
     set   (LED_DDR,  LED_NUM);
     
-    // set up the ADC
-    ADMUX = 0;  // VCC used as reference, ADC0 selected as current channel
-    ADCSRA = (1 << ADEN) | (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2);  // /128 prescaler for 78.125kHz ADC clock
-    DIDR0 = (1 << SLIDE_ADC) | (1 << ROT_ADC);  // disable digital inputs for the slide and pot pins
+    initADC();
+    
+    sei();
     
 #ifdef DEMO
     colorDemo();
 #else
     lightControls();
 #endif
+    
+    for (;;);  // should never reach here
     
     return 0;
 }
