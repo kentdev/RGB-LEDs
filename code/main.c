@@ -1,8 +1,8 @@
 #include "main.h"
 #include "sendToLED.h"
 
-#define SLIDE_DELTA 5
-#define ROT_DELTA 5
+#define SLIDE_DELTA 3
+#define ROT_DELTA 3
 
 //-----------------------------------------------------------------------------
 
@@ -144,19 +144,22 @@ static void colorDemo (void)
 
 static void setLEDs (const bool colorMode, const uint16_t slideADC, const uint16_t rotADC)
 {
-    // slideADC goes from 0-1023, but we want 0-255
-    const uint8_t scaledSlide = slideADC / 4;
+    const uint16_t DEAD_BAND = 48;
+    
+    // slideADC goes from 0-1023, but we want to ignore a dead band near 0 and scale from 0-255
+    uint8_t scaledSlide = 0;
+    if (slideADC > DEAD_BAND)
+    {
+        const uint32_t bandedSlide = slideADC - DEAD_BAND;
+        const uint32_t origRange = 1023 - DEAD_BAND;
+        const uint32_t destRange = 255;
+        scaledSlide = (uint8_t)(bandedSlide * destRange / origRange);
+    }
     
     // rotADC is between 0 and 1023, needs to be converted to between 0 and 767
     const uint16_t scaledRotary = (rotADC * 3) / 4;
     
-    // add a small dead band
-    if (scaledSlide < 3)
-    {
-        const uint8_t zeroRGB[3] = {0, 0, 0};
-        sendToLEDs (zeroRGB);
-    }
-    else if (colorMode)
+    if (colorMode)
     {
         uint8_t rgb[3];
         
@@ -172,7 +175,7 @@ static void setLEDs (const bool colorMode, const uint16_t slideADC, const uint16
     }
 }
 
-static uint16_t lowPassSlide (const uint16_t in)
+/*static uint16_t lowPassSlide (const uint16_t in)
 {
     static int16_t prev = 0;
     const int16_t alpha = 50; // out of 100
@@ -183,7 +186,7 @@ static uint16_t lowPassSlide (const uint16_t in)
     
     prev = new;
     return (uint16_t)new;
-}
+}*/
 
 static void lightControls (void)
 {
@@ -198,7 +201,8 @@ static void lightControls (void)
     
     for (;;)
     {
-        //toggle (PORTA, 6);
+        toggle (PORTA, 6);
+        
         const uint16_t slideValue = readADC (SLIDE_ADC);
         const uint16_t rotaryValue = readADC (ROT_ADC);
         
@@ -250,7 +254,8 @@ static void lightControls (void)
             setLEDs (colorMode, slideValue, rotaryValue);
             timeout += 10;
         }
-
+        
+        // TODO: Implement low-power mode
         _delay_ms (10);
     }
 }
@@ -266,8 +271,9 @@ int main()
     clear (BUTTON_PORT, BUTTON_NUM);
     clear (BUTTON_DDR,  BUTTON_NUM);
     
-    //set (DDRA, 6);
-    //clear(PORTA, 6);
+    // debug port (toggles every 10ms as long as the microcontroller is working)
+    set (DDRA, 6);
+    clear(PORTA, 6);
     
     // set the LED output pin as an output, starting out low
     clear (LED_PORT, LED_NUM);

@@ -28,9 +28,9 @@
 #define BUTTON_NUM  2
 
 // output data line to LED strip
-#define LED_DDR  DDRA
-#define LED_PORT PORTA
-#define LED_NUM  7
+#define LED_DDR  DDRB
+#define LED_PORT PORTB
+#define LED_NUM  2
 
 // bit macros
 #define set(reg,bit)     (reg |= (1<<(bit)))
