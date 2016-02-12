@@ -22,8 +22,7 @@ void pushLED (const uint8_t rgb[3])
     const uint8_t *x = rgb;
     
     /* This code takes an RGB value and sends it out LED_PORT, LED_NUM
-       (in this case, PA7) in the format expected by the TM1803
-       tricolor LED chip.
+       in the format expected by the TM1803 tricolor LED chip.
     */
     
     

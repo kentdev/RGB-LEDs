@@ -190,6 +190,8 @@ static void setLEDs (const bool colorMode, const uint16_t slideADC, const uint16
 
 static void lightControls (void)
 {
+    #define LOOP_MS 10
+    
     // initialize state variables
     static bool colorMode = false;
     static bool buttonWasDown[2] = {false, false};
@@ -252,17 +254,38 @@ static void lightControls (void)
         else
         {  // no timeout, but also no timeout reset
             setLEDs (colorMode, slideValue, rotaryValue);
-            timeout += 10;
+            timeout += LOOP_MS;
         }
         
         // TODO: Implement low-power mode
-        _delay_ms (10);
+        _delay_ms (LOOP_MS);
     }
 }
 
+/*
+ISR(WDT_vect)
+{
+    // power the system back up
+    clear (WDTCSR, WDE | WDIE);  // disable the watchdog timer
+    
+}
+
+void powerDown(void)
+{
+    // disable brown-out detection while in low-power modes
+    set (MCUCR, BODS | BODSE);
+    clear (MCUCR, BODSE);
+    set (MCUCR, BODS);
+    
+    // BODS only stays set for 3 clock cycles... need to set it immediately before issuing the sleep command
+}
+*/
 
 int main()
 {
+    // disable unnecessary peripherals: USI and timer1
+    set (PRR, PRUSI | PRTIM1);
+    
     // set the input pins as inputs with no pull-ups
     clear (SLIDE_PORT,  SLIDE_NUM);
     clear (SLIDE_DDR,   SLIDE_NUM);
