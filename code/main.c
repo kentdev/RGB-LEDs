@@ -87,7 +87,7 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
     // Color balance for a better white:
     // Ideally, I'd actually adjust the color temperature and then convert to RGB from there, but
     // doing that is very slow (involves logarithms), so I'll just wing it.
-    color[0] = scale (color[0], 7, 10);  // scale down red intensity to 70%
+    color[0] = scale (color[0], 60, 100);  // scale down red intensity to 65%
     color[1] = scale (color[1], 1, 1);  // keep green as-is
     color[2] = scale (color[2], 9, 10);  // scale down blue slightly
 }
@@ -239,7 +239,7 @@ static void lightControls (void)
             timeout = 0;
             setLEDs (colorMode, slideValue, rotaryValue);
         }
-        else if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)2)
+        else if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)1)  // 1-hour timeout
         {  // timeout event
             const uint8_t zeroRGB[3] = {0, 0, 0};
             sendToLEDs (zeroRGB);
