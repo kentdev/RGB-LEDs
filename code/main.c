@@ -113,8 +113,8 @@ static void colorDemo (void)
     
     for (;;)
     {
-	    hue += 20;
-        if (hue >= 768)
+	    hue += 25;
+        while (hue >= 768)
             hue -= 768;
         
         value += valueDir;
@@ -135,7 +135,11 @@ static void colorDemo (void)
         
         resetLEDs();
         for (uint8_t i = 0; i < NUM_LEDS; i++)
+        {
+            cli();
             pushLED (rgbChain[i]);
+            sei();
+        }
         
         _delay_ms (50);
     }
