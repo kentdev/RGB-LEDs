@@ -92,59 +92,59 @@ static void hsb2rgbAN2 (uint16_t index, uint8_t sat, uint8_t bright, uint8_t col
     color[2] = scale (color[2], 9, 10);  // scale down blue slightly
 }
 
-#ifdef DEMO
-static void colorDemo (void)
+static void discoLights (void)
 {
-    uint16_t hue = 0;
-    uint8_t saturation = 255;
-    uint8_t value = 64;
-    int8_t valueDir = -1;
+    static bool first = true;
+    
+    static uint16_t hue = 0;
+    static uint8_t saturation = 255;
+    static uint8_t value = 64;
+    static int8_t valueDir = -1;    
+    static uint8_t rgbChain[NUM_LEDS][3];
+    
     uint8_t rgb[3];
-    uint8_t rgbChain[NUM_LEDS][3];
     
-    // initialize all to one color
-    hsb2rgbAN2 (hue, saturation, value, rgb);
-    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    if (first)
     {
-        rgbChain[i][0] = rgb[0];
-        rgbChain[i][1] = rgb[1];
-        rgbChain[i][2] = rgb[2];
-    }
-    
-    for (;;)
-    {
-	    hue += 25;
-        while (hue >= 768)
-            hue -= 768;
-        
-        value += valueDir;
-        if (value == 0 || value == 64)
-            valueDir = -valueDir;
-        
-        hsb2rgbAN2 (hue, saturation, value, rgb);
-        
-        for (uint8_t i = NUM_LEDS - 1; i > 0; i--)
-        {
-            rgbChain[i][0] = rgbChain[i - 1][0];
-            rgbChain[i][1] = rgbChain[i - 1][1];
-            rgbChain[i][2] = rgbChain[i - 1][2];
-        }
-        rgbChain[0][0] = rgb[0];
-        rgbChain[0][1] = rgb[1];
-        rgbChain[0][2] = rgb[2];
-        
-        resetLEDs();
+        // first run, initialize the RGB chain
         for (uint8_t i = 0; i < NUM_LEDS; i++)
         {
-            cli();
-            pushLED (rgbChain[i]);
-            sei();
+            rgbChain[i][0] = 0;
+            rgbChain[i][1] = 0;
+            rgbChain[i][2] = 0;
         }
         
-        _delay_ms (50);
+        first = false;
+    }
+    
+    hue += 25;
+    while (hue >= 768)
+        hue -= 768;
+    
+    value += valueDir;
+    if (value == 0 || value == 64)
+        valueDir = -valueDir;
+    
+    hsb2rgbAN2 (hue, saturation, value, rgb);
+    
+    for (uint8_t i = NUM_LEDS - 1; i > 0; i--)
+    {
+        rgbChain[i][0] = rgbChain[i - 1][0];
+        rgbChain[i][1] = rgbChain[i - 1][1];
+        rgbChain[i][2] = rgbChain[i - 1][2];
+    }
+    rgbChain[0][0] = rgb[0];
+    rgbChain[0][1] = rgb[1];
+    rgbChain[0][2] = rgb[2];
+    
+    resetLEDs();
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+        cli();
+        pushLED (rgbChain[i]);
+        sei();
     }
 }
-#endif
 
 static void setLEDs (const bool colorMode, const uint16_t slideADC, const uint16_t rotADC)
 {
@@ -205,6 +205,9 @@ static void lightControls (void)
     uint16_t oldSlideValue = readADC (SLIDE_ADC);
     uint16_t oldRotaryValue = readADC (ROT_ADC);
     
+    uint32_t buttonDownTime = 0;
+    bool discoMode = false;
+    
     for (;;)
     {
         toggle (PORTA, 6);
@@ -238,10 +241,28 @@ static void lightControls (void)
         if (rotaryPositionChanged)
             oldRotaryValue = rotaryValue;
         
+        if (!discoMode && buttonEvent && buttonDownTime >= 2500)
+        {
+            discoMode = true;
+        }
+        else if (discoMode && buttonEvent)
+        {
+            discoMode = false;
+        }
+        
+        if (buttonIsDown)
+            buttonDownTime += LOOP_MS;
+        else
+            buttonDownTime = 0;
+        
         if (buttonEvent || slidePositionChanged || rotaryPositionChanged)
         {  // timeout reset
             timeout = 0;
-            setLEDs (colorMode, slideValue, rotaryValue);
+            
+            if (discoMode)
+                discoLights();
+            else
+                setLEDs (colorMode, slideValue, rotaryValue);
         }
         else if (timeout > (uint32_t)1000 * (uint32_t)3600 * (uint32_t)1)  // 1-hour timeout
         {  // timeout event
@@ -257,7 +278,11 @@ static void lightControls (void)
         }
         else
         {  // no timeout, but also no timeout reset
-            setLEDs (colorMode, slideValue, rotaryValue);
+            if (discoMode)
+                discoLights();
+            else
+                setLEDs (colorMode, slideValue, rotaryValue);
+            
             timeout += LOOP_MS;
         }
         
@@ -306,15 +331,14 @@ int main()
     clear (LED_PORT, LED_NUM);
     set   (LED_DDR,  LED_NUM);
     
+    // set up the ADC interrupt
     initADC();
     
+    // enable interrupts globally
     sei();
     
-#ifdef DEMO
-    colorDemo();
-#else
-    lightControls();
-#endif
+    // begin controlling the LEDs
+    lightControls();  // never returns
     
     for (;;);  // should never reach here
     
